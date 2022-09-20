@@ -1,6 +1,6 @@
-Recursive and Interative Backtracking Maze Generator
+# Recursive and Interative Backtracking Maze Generator
 
-Contains:
+## Contains:
 1. **interative_maze** method
 2. **recursive_maze** method
 3. **generate_maze** method
