@@ -22,45 +22,65 @@ class Cell:
     def visit(self):
         self.visited = True
     
+    def get_pos(self):
+        return self.x*self.size, self.y*self.size
+
     def draw(self, screen):
-        draw_x = self.x*self.size
-        draw_y = self.y*self.size
+        draw_x, draw_y = self.get_pos()
 
         if self.walls[N]:
-            pygame.draw.line(screen, self.color, (draw_x, draw_y), (draw_x+self.size, draw_y))
+            a, b = Cell.direction_to_coord(N, draw_x, draw_y, self.size)
+            pygame.draw.line(screen, self.color, a, b)
         if self.walls[W]:
-            pygame.draw.line(screen, self.color, (draw_x+self.size, draw_y), (draw_x+self.size, draw_y+self.size))
+            a, b = Cell.direction_to_coord(W, draw_x, draw_y, self.size)
+            pygame.draw.line(screen, self.color, a, b)
         if self.walls[S]:
-            pygame.draw.line(screen, self.color, (draw_x, draw_y+self.size), (draw_x+self.size, draw_y+self.size))
+            a, b = Cell.direction_to_coord(S, draw_x, draw_y, self.size)
+            pygame.draw.line(screen, self.color, a, b)
         if self.walls[E]:
-            pygame.draw.line(screen, self.color, (draw_x, draw_y), (draw_x, draw_y+self.size))
+            a, b = Cell.direction_to_coord(E, draw_x, draw_y, self.size)
+            pygame.draw.line(screen, self.color, a, b)
+
+    @staticmethod
+    def direction_to_coord(dir, x, y, size):
+        if dir == N:
+            return [[x, y], [x+size, y]]
+        if dir == W:
+            return [[x, y], [x, y+size]]
+        if dir == S:
+            return [[x, y+size], [x+size, y+size]]
+        if dir == E:
+            return [[x+size, y], [x+size, y+size]]
+    
+    def __str__(self):
+        return f"{self.x}, {self.y}, {self.size}, {self.visited}, {self.walls}"
 
 def interative_maze(cx, cy, grid):
     path = {(cx, cy): 0}
 
     while len(path) != 0:
-            adjacent = [N, S, E, W]
-            random.shuffle(adjacent)
+        adjacent = [N, S, E, W]
+        random.shuffle(adjacent)
 
-            for adj in adjacent:
-                nx, ny = next_coord(cx, cy, adj)
+        for adj in adjacent:
+            nx, ny = next_coord(cx, cy, adj)
 
-                if 0 <= ny < len(grid) and 0 <= nx < len(grid[ny]) and not grid[ny][nx].visited:
-                    # num_of_walls = 0
-                    # for wall in grid[ny][nx].walls:
-                    #     if wall:
-                    #         num_of_walls += 1
-                    # if num_of_walls > 3:
-                    if grid[ny][nx].walls.count(True) > 3:
-                        grid[cy][cx].visit()
-                        grid[cy][cx].walls[adj] = False
-                        grid[ny][nx].walls[opposite[adj]] = False
-                        path[(cx, cy)] = (nx, ny)
-                        cx, cy = nx, ny
-                        break
-            else:
-                cx, cy = list(path.values())[-1]
-                path.popitem()
+            if 0 <= ny < len(grid) and 0 <= nx < len(grid[ny]) and not grid[ny][nx].visited:
+                # num_of_walls = 0
+                # for wall in grid[ny][nx].walls:
+                #     if wall:
+                #         num_of_walls += 1
+                # if num_of_walls > 3:
+                if grid[ny][nx].walls.count(True) > 3:
+                    grid[cy][cx].visit()
+                    grid[cy][cx].walls[adj] = False
+                    grid[ny][nx].walls[opposite[adj]] = False
+                    path[(cx, cy)] = (nx, ny)
+                    cx, cy = nx, ny
+                    break
+        else:
+            cx, cy = list(path.values())[-1]
+            path.popitem()
 
 def recursive_maze(cx, cy, grid):
     adjacent = [N, S, E, W]
@@ -112,7 +132,7 @@ if __name__ == "__main__":
     size = 20
     
     screen = pygame.display.set_mode((width, height))
-    pygame.display.set_caption("RayCasting")
+    pygame.display.set_caption("Maze Generator")
 
     clock = pygame.time.Clock()
 
